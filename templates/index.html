@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContactBook | Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #172033;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 22px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        header p {
+            margin: 7px 0 0;
+            color: #cbd5e1;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .card,
+        .panel {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 4px 18px #1725540c;
+        }
+
+        .card span {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .card h2 {
+            margin: 12px 0 0;
+            font-size: 30px;
+            color: #4f46e5;
+        }
+
+        .panel {
+            margin-bottom: 22px;
+        }
+
+        h3 {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 13px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dbe1ec;
+            border-radius: 8px;
+            font: inherit;
+            margin-bottom: 12px;
+        }
+
+        textarea {
+            min-height: 75px;
+            resize: vertical;
+        }
+
+        button,
+        .btn {
+            border: 0;
+            padding: 11px 15px;
+            border-radius: 8px;
+            background: #4f46e5;
+            color: white;
+            cursor: pointer;
+            font: inherit;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        button:hover,
+        .btn:hover {
+            opacity: .88;
+        }
+
+        .search {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search input {
+            margin: 0;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th,
+        td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        th {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .edit {
+            background: #0891b2;
+        }
+
+        .delete {
+            background: #dc2626;
+        }
+
+        .flash {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .muted {
+            color: #64748b;
+        }
+
+        dialog {
+            border: 0;
+            border-radius: 14px;
+            width: min(500px, 95%);
+            padding: 25px;
+        }
+
+        dialog::backdrop {
+            background: #0f172a99;
+        }
+
+        .close {
+            background: #64748b;
+            margin-left: 6px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 20px;
+            }
+
+            main {
+                padding: 0 12px;
+                margin-top: 18px;
+            }
+
+            .panel {
+                padding: 16px;
+            }
+
+            .search {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div>
+            <h1>📒 ContactBook</h1>
+            <p>Your personal contact management dashboard</p>
+        </div>
+        <span>Organize. Connect. Simplify.</span>
+    </header>
+
+    <main>
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <section class="stats">
+            <div class="card">
+                <span>Total Contacts</span>
+                <h2>{{ stats.total_contacts }}</h2>
+            </div>
+            <div class="card">
+                <span>Contacts with Email</span>
+                <h2>{{ stats.contacts_with_email }}</h2>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h3>＋ Add New Contact</h3>
+            <form action="{{ url_for('add') }}" method="post">
+                <div class="form-grid">
+                    <input name="name" placeholder="Full name *" required>
+                    <input name="phone" placeholder="Phone number *" required>
+                    <input name="email" type="email" placeholder="Email address">
+                    <input name="address" placeholder="Address">
+                </div>
+                <textarea name="notes" placeholder="Notes (optional)"></textarea>
+                <button type="submit">Save Contact</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h3>🔎 Find Contacts</h3>
+            <form class="search" action="{{ url_for('index') }}" method="get">
+                <input name="search" placeholder="Search by name, phone or email..." value="{{ search }}">
+                <button type="submit">Search</button>
+                <a class="btn" href="{{ url_for('index') }}">Reset</a>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h3>All Contacts <span class="muted">({{ contacts|length }})</span></h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Address</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in contacts %}
+                        <tr>
+                            <td><strong>{{ c.name }}</strong></td>
+                            <td>{{ c.phone }}</td>
+                            <td>{{ c.email or '—' }}</td>
+                            <td>{{ c.address or '—' }}</td>
+                            <td>
+                                <div class="actions">
+                                    <button type="button" class="edit" onclick="openEdit(this)" data-id="{{ c.id }}"
+                                        data-name="{{ c.name }}" data-phone="{{ c.phone }}"
+                                        data-email="{{ c.email or '' }}" data-address="{{ c.address or '' }}"
+                                        data-notes="{{ c.notes or '' }}">
+                                        Edit
+                                    </button>
+                                    <form action="{{ url_for('delete', contact_id=c.id) }}" method="post"
+                                        onsubmit="return confirm('Delete this contact?')">
+                                        <button class="delete" type="submit">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="muted">
+                                No contacts found. Add a contact or change your search.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <dialog id="editDialog">
+        <h3>Edit Contact</h3>
+        <form id="editForm" method="post">
+            <input name="name" id="editName" placeholder="Full name" required>
+            <input name="phone" id="editPhone" placeholder="Phone number" required>
+            <input name="email" id="editEmail" type="email" placeholder="Email">
+            <input name="address" id="editAddress" placeholder="Address">
+            <textarea name="notes" id="editNotes" placeholder="Notes"></textarea>
+            <button type="submit">Save Changes</button>
+            <button type="button" class="close" onclick="document.getElementById('editDialog').close()">
+                Cancel
+            </button>
+        </form>
+    </dialog>
+
+    <script>
+        function openEdit(button) {
+            const id = button.dataset.id;
+            document.getElementById('editForm').action = '/update/' + id;
+            document.getElementById('editName').value = button.dataset.name;
+            document.getElementById('editPhone').value = button.dataset.phone;
+            document.getElementById('editEmail').value = button.dataset.email;
+            document.getElementById('editAddress').value = button.dataset.address;
+            document.getElementById('editNotes').value = button.dataset.notes;
+            document.getElementById('editDialog').showModal();
+        }
+    </script>
+</body>
+
+</html>
